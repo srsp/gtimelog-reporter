@@ -3,12 +3,13 @@
  */
 package com.spruenker.gtimelog.reporter;
 
+import com.spruenker.gtimelog.reporter.TimeUtil.Duration;
+
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map.Entry;
-
-import com.spruenker.gtimelog.reporter.TimeUtil.Duration;
 
 /**
  * Main class.
@@ -37,27 +38,30 @@ public class Reporter {
 			file = args[0];
 		}
 
-		try {
-			Cumulator cumulator = new Cumulator();
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			String line;
-			line = br.readLine();
-			while (line != null) {
-				cumulator.addLogEntry(line);
-				line = br.readLine();
-			}
-			br.close();
-			printResult(cumulator);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try {
+            Report report = new Report();
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            line = br.readLine();
+            while (line != null) {
+                report.addLogEntry(line);
+                line = br.readLine();
+            }
+            br.close();
+            printResult(report);
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not find " + file);
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Could not open " + file);
+            e.printStackTrace();
+        }
 	}
 
 
-	private static void printResult(Cumulator cumulator) {
+	private static void printResult(Report report) {
 		// Daily Report
-		for (Day day : cumulator.getDays()) {
+		for (Day day : report.getDays()) {
 			out("\n");
 			out(day.getPrettyDay());
 			// For every project
@@ -77,16 +81,16 @@ public class Reporter {
 		out("");
 
 		// Monthly report
-		out("Slacked: " + timeUtilHour.getDuration(cumulator.getSlackingTime()));
-		out("Worked:  " + timeUtilHour.getDuration(cumulator.getWorkingTime()));
+		out("Slacked: " + timeUtilHour.getDuration(report.getSlackingTime()));
+		out("Worked:  " + timeUtilHour.getDuration(report.getWorkingTime()));
 		out("");
 		out("TASKS");
-		for (Entry<String, Long> task : cumulator.getTaskTimes().entrySet()) {
+		for (Entry<String, Long> task : report.getTaskTimes().entrySet()) {
 			out("\t" + task.getKey() + ": " + timeUtilHour.getDuration(task.getValue()));
 		}
 		out("");
 		out("CATEGORIES");
-		for (Entry<String, Long> category : cumulator.getCategoryTimes().entrySet()) {
+		for (Entry<String, Long> category : report.getCategoryTimes().entrySet()) {
 			out("\t" + category.getKey() + ": " + timeUtilHour.getDuration(category.getValue())); // + "  //  " +
 																									// timeUtilDay.getDuration(category.getValue()));
 		}

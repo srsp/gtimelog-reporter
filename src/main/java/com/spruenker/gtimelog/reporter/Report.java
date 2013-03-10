@@ -14,7 +14,7 @@ import java.util.TreeMap;
  * @author Simon Sprünker
  *
  */
-public class Cumulator {
+public class Report {
 
 	private List<Day> days = new ArrayList<Day>();
 
