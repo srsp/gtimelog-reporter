@@ -12,36 +12,48 @@ import com.spruenker.gtimelog.reporter.TimeUtil.Duration;
 
 /**
  * Main class.
+ * 
  * @author Simon Sprünker
  */
 public class Reporter {
 
-	private static final String IN_FILE_DEFAULT = "/home/simon/.gtimelog/timelog.txt";
+	private static final String IN_FILE_DEFAULT = "/Users/simon/.gtimelog/timelog.txt";
 
 	private static final TimeUtil timeUtilHour = new TimeUtil(Duration.MINUTE, Duration.HOUR);
 	private static final TimeUtil timeUtilDay = new TimeUtil(Duration.MINUTE, Duration.HOUR, Duration.WORK_DAY);
 
 
 	/**
+	 * Run with "java com.spruenker.gtimelog.reporter.Reporter "~/.gtimelog/timelog.txt"
+	 * 
 	 * @param args
+	 *            First (and only) argument is the location of you timelog.txt file.
 	 */
 	public static void main(String[] args) {
+
+		String file = IN_FILE_DEFAULT;
+
+		if (args != null && args.length > 0) {
+			file = args[0];
+		}
+
 		try {
 			Cumulator cumulator = new Cumulator();
-			BufferedReader br = new BufferedReader(new FileReader(
-					IN_FILE_DEFAULT));
+			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
 			line = br.readLine();
 			while (line != null) {
 				cumulator.addLogEntry(line);
 				line = br.readLine();
 			}
+			br.close();
 			printResult(cumulator);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
 
 	private static void printResult(Cumulator cumulator) {
 		// Daily Report
@@ -75,10 +87,12 @@ public class Reporter {
 		out("");
 		out("CATEGORIES");
 		for (Entry<String, Long> category : cumulator.getCategoryTimes().entrySet()) {
-			out("\t" + category.getKey() + ": " + timeUtilHour.getDuration(category.getValue())); // + "  //  " + timeUtilDay.getDuration(category.getValue()));
+			out("\t" + category.getKey() + ": " + timeUtilHour.getDuration(category.getValue())); // + "  //  " +
+																									// timeUtilDay.getDuration(category.getValue()));
 		}
 
 	}
+
 
 	private static void out(String string) {
 		System.out.println(string);
