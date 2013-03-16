@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 
 
+import com.spruenker.gtimelog.reporter.model.LogEntry;
 import org.junit.Test;
 
 /**

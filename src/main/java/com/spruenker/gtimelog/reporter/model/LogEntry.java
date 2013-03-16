@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.spruenker.gtimelog.reporter;
+package com.spruenker.gtimelog.reporter.model;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -4,6 +4,8 @@
 package com.spruenker.gtimelog.reporter;
 
 
+import com.spruenker.gtimelog.reporter.model.Day;
+import com.spruenker.gtimelog.reporter.model.LogEntry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -3,43 +3,53 @@
  */
 package com.spruenker.gtimelog.reporter;
 
-import com.spruenker.gtimelog.reporter.TimeUtil.Duration;
+import com.spruenker.gtimelog.reporter.formatter.Formatter;
+import com.spruenker.gtimelog.reporter.formatter.FormatterTypes;
+import com.spruenker.gtimelog.reporter.model.Report;
+import com.spruenker.gtimelog.reporter.printer.Printer;
+import com.spruenker.gtimelog.reporter.printer.PrinterTypes;
+import com.spruenker.gtimelog.reporter.printer.SystemOutPrinter;
+import org.apache.commons.cli.*;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Map.Entry;
 
 /**
  * Main class.
- * 
+ *
  * @author Simon Sprünker
  */
 public class Reporter {
 
-	private static final String IN_FILE_DEFAULT = "/Users/simon/.gtimelog/timelog.txt";
+    private static final String IN_FILE_DEFAULT = "/Users/simon/.gtimelog/timelog.txt";
+    private static String file = IN_FILE_DEFAULT;
+    private static Formatter formatter = FormatterTypes.TEXT.getInstance();
+    private static Printer printer = new SystemOutPrinter();
 
-	private static final TimeUtil timeUtilHour = new TimeUtil(Duration.MINUTE, Duration.HOUR);
-	private static final TimeUtil timeUtilDay = new TimeUtil(Duration.MINUTE, Duration.HOUR, Duration.WORK_DAY);
+    /**
+     * Run with "java com.spruenker.gtimelog.reporter.Reporter "~/.gtimelog/timelog.txt"
+     *
+     * @param args First (and only) argument is the location of you timelog.txt file.
+     */
+    public static void main(String[] args) {
 
+        Report report = importFromFile();
 
-	/**
-	 * Run with "java com.spruenker.gtimelog.reporter.Reporter "~/.gtimelog/timelog.txt"
-	 * 
-	 * @param args
-	 *            First (and only) argument is the location of you timelog.txt file.
-	 */
-	public static void main(String[] args) {
+        String reportString = formatter.format(report);
 
-		String file = IN_FILE_DEFAULT;
+        printer.print(reportString);
+    }
 
-		if (args != null && args.length > 0) {
-			file = args[0];
-		}
-
+    /**
+     * Reads the timelog.txt and returns its content as a Report-Object.
+     *
+     * @return Report
+     */
+    private static Report importFromFile() {
+        Report report = new Report();
         try {
-            Report report = new Report();
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             line = br.readLine();
@@ -48,7 +58,6 @@ public class Reporter {
                 line = br.readLine();
             }
             br.close();
-            printResult(report);
         } catch (FileNotFoundException e) {
             System.out.println("Could not find " + file);
             e.printStackTrace();
@@ -56,50 +65,33 @@ public class Reporter {
             System.out.println("Could not open " + file);
             e.printStackTrace();
         }
-	}
+        return report;
+    }
+
+    private static void parseArgs(String[] args) {
+
+        // create Options object
+        Options options = new Options();
+        options.addOption("f", "formatter", true, "The Formatter to use. Available formatters are: text");
+        options.addOption("p", "printer", true, "The Printer to use. Available printers are: tty");
+        //options.addOption("o", "output", true, "The name of the file the report is written into");
 
 
-	private static void printResult(Report report) {
-		// Daily Report
-		for (Day day : report.getDays()) {
-			out("\n");
-			out(day.getPrettyDay());
-			// For every project
-			out("\tSlacked: " + timeUtilHour.getDuration(day.getSlackingTime()));
-			out("\tWorked:  " + timeUtilHour.getDuration(day.getWorkingTime()));
-			out("");
-			out("\tTASKS");
-			for (Entry<String, Long> task : day.getTaskTimes().entrySet()) {
-				out("\t\t" + task.getKey() + ": " + timeUtilHour.getDuration(task.getValue()));
-			}
-			out("");
-			out("\tCATEGORIES");
-			for (Entry<String, Long> category : day.getCategoryTimes().entrySet()) {
-				out("\t\t" + category.getKey() + ": " + timeUtilHour.getDuration(category.getValue()));
-			}
-		}
-		out("");
+        CommandLineParser parser = new PosixParser();
+        try {
+            CommandLine cmd = parser.parse( options, args);
+            String formatterArg = cmd.getOptionValue("f", "text");
+            String printerArg = cmd.getOptionValue("p", "tty");
 
-		// Monthly report
-		out("Slacked: " + timeUtilHour.getDuration(report.getSlackingTime()));
-		out("Worked:  " + timeUtilHour.getDuration(report.getWorkingTime()));
-		out("");
-		out("TASKS");
-		for (Entry<String, Long> task : report.getTaskTimes().entrySet()) {
-			out("\t" + task.getKey() + ": " + timeUtilHour.getDuration(task.getValue()));
-		}
-		out("");
-		out("CATEGORIES");
-		for (Entry<String, Long> category : report.getCategoryTimes().entrySet()) {
-			out("\t" + category.getKey() + ": " + timeUtilHour.getDuration(category.getValue())); // + "  //  " +
-																									// timeUtilDay.getDuration(category.getValue()));
-		}
+            formatter = FormatterTypes.getInstance(formatterArg);
+            printer = PrinterTypes.getInstance(printerArg);
 
-	}
+        } catch (ParseException e) {
+            // TODO Make nice
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
 
 
-	private static void out(String string) {
-		System.out.println(string);
-	}
+    }
 
 }
