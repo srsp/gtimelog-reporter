@@ -8,7 +8,11 @@ import com.spruenker.gtimelog.reporter.formatter.FormatterTypes;
 import com.spruenker.gtimelog.reporter.model.Report;
 import com.spruenker.gtimelog.reporter.printer.Printer;
 import com.spruenker.gtimelog.reporter.printer.PrinterTypes;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
