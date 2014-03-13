@@ -1,11 +1,17 @@
 package com.spruenker.gtimelog.reporter.formatter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Enum of all available Formatters.
+ *
  * @author Simon Sprünker
  */
 public enum FormatterTypes {
     TEXT    (new TextFormatter(), "text");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FormatterTypes.class);
 
     private final Formatter formatter;
     private final String shortName;
@@ -29,6 +35,7 @@ public enum FormatterTypes {
                 return option.getInstance();
             }
         }
+        LOGGER.warn("Unknown Formatter '{}'", shortName);
         return FormatterTypes.TEXT.getInstance();
     }
 

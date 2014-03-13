@@ -7,20 +7,15 @@ import com.spruenker.gtimelog.reporter.TimeUtil;
 import java.util.Map;
 
 /**
- * Provides methods of printing the report.
+ * Prints the report to stdout.
  *
  * @author Simon Sprünker
  */
 public class SystemOutPrinter implements Printer {
 
-    private static final TimeUtil timeUtilHour = new TimeUtil(TimeUtil.Duration.MINUTE, TimeUtil.Duration.HOUR);
-    private static final TimeUtil timeUtilDay = new TimeUtil(TimeUtil.Duration.MINUTE, TimeUtil.Duration.HOUR, TimeUtil.Duration.WORK_DAY);
-
     @Override
     public void print(String report) {
-
         System.out.println(report);
-
     }
 
 }

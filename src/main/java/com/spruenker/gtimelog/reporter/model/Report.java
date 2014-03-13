@@ -11,8 +11,9 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 /**
- * @author Simon Sprünker
+ * Holds a report of activities for several days.
  *
+ * @author Simon Sprünker
  */
 public class Report {
 

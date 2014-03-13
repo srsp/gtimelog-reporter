@@ -3,6 +3,9 @@
  */
 package com.spruenker.gtimelog.reporter.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,9 +22,14 @@ import java.util.TreeMap;
  */
 public class Day {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(Day.class);
+
 	private static final int MILLIS_TO_SECONDS = 1000;
 
 	private static final SimpleDateFormat PRETTY_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    /** Holds the day this instance is for. */
+    private Date dayDate = null;
 
 	/** Holds the Tasks and times for these on the given day. */
 	private Map<String, Long> taskTimes = new TreeMap<String, Long>();
@@ -40,7 +48,11 @@ public class Day {
 
 
 	public void addLogEntry(LogEntry entry) {
+        if (dayDate == null) {
+            dayDate = entry.getDate();
+        }
 		logEntries.add(entry);
+        calculate();
 	}
 
 
@@ -50,7 +62,6 @@ public class Day {
 	 * @return
 	 */
 	public Map<String, Long> getTaskTimes() {
-		calculate();
 		return taskTimes;
 	}
 
@@ -61,7 +72,6 @@ public class Day {
 	 * @return
 	 */
 	public Map<String, Long> getCategoryTimes() {
-		calculate();
 		return categoryTimes;
 	}
 
@@ -72,7 +82,6 @@ public class Day {
 	 * @return
 	 */
 	public long getSlackingTime() {
-		calculate();
 		return slackingTime;
 	}
 
@@ -98,9 +107,14 @@ public class Day {
 		workingTime = 0;
 		slackingTime = 0;
 
-		// Something todo?
-		if (logEntries == null || logEntries.size() < 2) {
-			// TODO Log
+		// If we don't have entries or only one entries we cannot calculate a duration.
+        if (logEntries == null) {
+            LOGGER.debug("Cannot calculate duration.");
+            return;
+        } else if (logEntries.size() < 2) {
+            if (LOGGER.isDebugEnabled()) {
+			    LOGGER.debug("Cannot calculate duration for {}", PRETTY_DATE_FORMAT.format(dayDate));
+            }
 			return;
 		}
 
@@ -112,7 +126,6 @@ public class Day {
 			if (start.equals(logEntry.getDate())) {
 				continue;
 			}
-			;
 
 			String task = logEntry.getTask();
 
@@ -173,7 +186,6 @@ public class Day {
 
 
 	public String getPrettyDay() {
-		// The day is unused, therefore it can be used for the given date.
 		if (logEntries.isEmpty()) {
 			return "";
 		}

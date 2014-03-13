@@ -1,7 +1,11 @@
 package com.spruenker.gtimelog.reporter.printer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Enum of all available Printers.
+ *
  * @author Simon Sprünker
  */
 public enum PrinterTypes {
@@ -14,6 +18,8 @@ public enum PrinterTypes {
         this.printer = printer;
         this.shortName = shortName;
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrinterTypes.class);
 
     public Printer getInstance() {
         return printer;
@@ -29,6 +35,7 @@ public enum PrinterTypes {
                 return option.getInstance();
             }
         }
+        LOGGER.warn("Unknown Printer '{}'", shortName);
         return PrinterTypes.TTY.getInstance();
     }
 

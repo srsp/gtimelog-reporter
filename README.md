@@ -20,7 +20,7 @@ Your ~/.gtimelog/timelog.txt looks like this:
 
 Running gtimelog-reporter yields:
 
-    $ java com.spruenker.gtimelog.reporter.Reporter "~/.gtimelog/timelog.txt"
+    $ java com.spruenker.gtimelog.reporter.Reporter -i "~/.gtimelog/timelog.txt"
     2013-03-30
         Slacked: 1 h
         Worked:  7 h 54 m
