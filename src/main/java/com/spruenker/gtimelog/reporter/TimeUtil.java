@@ -3,6 +3,8 @@
  */
 package com.spruenker.gtimelog.reporter;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -87,16 +89,18 @@ public class TimeUtil {
 			long unit = iterator.next();
 			if (seconds >= unit) {
 				// How many times does the unit fit into the duration?
-				long times = seconds / unit;
+				Long times = seconds / unit;
 				String unitDescription = unitMap.get(unit);
 				// if (times == 1) {
 				// // singular
 				// unitDescription = StringUtils.chop(unitDescription);
 				// }
-				readableTime.append(times).append(" ").append(unitDescription).append(" ");
+				readableTime.append(StringUtils.leftPad(times.toString(), 2)).append(" ").append(unitDescription).append(" ");
 				// Rest
 				seconds = seconds % unit;
-			}
+			} else {
+                readableTime.append("     ");
+            }
 		}
 		return readableTime.toString();
 	}
