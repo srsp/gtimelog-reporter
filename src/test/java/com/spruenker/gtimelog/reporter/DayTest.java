@@ -6,9 +6,12 @@ package com.spruenker.gtimelog.reporter;
 
 import com.spruenker.gtimelog.reporter.model.Day;
 import com.spruenker.gtimelog.reporter.model.LogEntry;
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * @author Simon Sprünker
@@ -40,12 +43,12 @@ public class DayTest {
 
 	@Test
 	public void testSlackingTime() {
-		Assert.assertEquals(107 * 60L, day.getSlackingTime());
+		Assert.assertEquals(107 * 60L, day.getSlackingTime()); // 107 minutes
 	}
 
 	@Test
 	public void testWorkingTime() {
-		Assert.assertEquals(396 * 60L, day.getWorkingTime());
+		Assert.assertEquals(396 * 60L, day.getWorkingTime()); // 396 minutes
 	}
 
 	@Test
@@ -68,4 +71,66 @@ public class DayTest {
 		Long expected = 146 * 60L;
 		Assert.assertEquals(expected, actual);
 	}
+
+    @Test
+    public void showTaskWhenOnlyTwoEntriesGiven() {
+        // Given
+        Day day = new Day();
+        day.addLogEntry(new LogEntry("2014-03-12 08:00: arrived"));
+        day.addLogEntry(new LogEntry("2014-03-12 16:00: Vacation"));
+        // When
+        Map<String, Long> tasks = day.getTaskTimes();
+        // Then
+        Assert.assertEquals("There is one task", 1, tasks.size());
+        Assert.assertTrue("The task is 'Vacation'", tasks.containsKey("Vacation"));
+        Assert.assertTrue("The task duration is 8h", 8 * 60 * 60L == tasks.get("Vacation"));
+    }
+
+    @Test
+    public void isOnSameDayWhenGivenSameDates() {
+        // Given
+        Day day = new Day();
+        day.addLogEntry(new LogEntry("2014-03-12 08:00: arrived"));
+        LocalDateTime date = new LocalDateTime(2014, 3, 12, 8, 0);
+        // When
+        boolean isOn = day.isSameDay(date);
+        // Then
+        Assert.assertTrue("Same dates is not on same day", isOn);
+    }
+
+    @Test
+    public void isOnSameDayWhenGivenSameDayDifferentHour() {
+        // Given
+        Day day = new Day();
+        day.addLogEntry(new LogEntry("2014-03-12 08:00: arrived"));
+        LocalDateTime date = new LocalDateTime(2014, 3, 12, 16, 0);
+        // When
+        boolean isOn = day.isSameDay(date);
+        // Then
+        Assert.assertTrue("Same dates is not on same day", isOn);
+    }
+
+    @Test
+    public void isNotOnSameDayWhenGivenFollowingDaySameTime() {
+        // Given
+        Day day = new Day();
+        day.addLogEntry(new LogEntry("2014-03-12 08:00: arrived"));
+        LocalDateTime date = new LocalDateTime(2014, 3, 13, 8, 0);
+        // When
+        boolean isOn = day.isSameDay(date);
+        // Then
+        Assert.assertFalse("Different dates on same day", isOn);
+    }
+
+    @Test
+    public void isNotOnSameDayWhenGivenFollowingDayLessThan24h() {
+        // Given
+        Day day = new Day();
+        day.addLogEntry(new LogEntry("2014-03-12 08:00: arrived"));
+        LocalDateTime date = new LocalDateTime(2014, 3, 13, 3, 0);
+        // When
+        boolean isOn = day.isSameDay(date);
+        // Then
+        Assert.assertFalse("Different dates on same day", isOn);
+    }
 }

@@ -13,6 +13,11 @@ import java.util.TreeMap;
  */
 public class TimeUtil {
 
+    public enum Period {
+        ALL,
+        WEEK
+    }
+
 	// @formatter:off
     /* This looks uglier than it is. We are only calculating durations that occur in one day. So mostly on one day a
     a minute has 60 seconds, and an hour has 60 minutes. Since we are adding durations that occurred on one day, we can assume
@@ -57,7 +62,7 @@ public class TimeUtil {
 	 * @param durations Durations
 	 */
 	public TimeUtil(Duration... durations) {
-		// Initialise map
+		// Initialize map
 		unitMap = new TreeMap<Long, String>();
 		for (Duration duration : durations) {
 			unitMap.put(duration.time(), duration.description());
@@ -75,7 +80,7 @@ public class TimeUtil {
 	 * @return human readable time frame
 	 */
 	public String getDuration(long seconds) {
-		StringBuffer readableTime = new StringBuffer();
+		StringBuilder readableTime = new StringBuilder();
 		Iterator<Long> iterator = unitMap.descendingKeySet().iterator();
 		unitMap.navigableKeySet();
 		while (iterator.hasNext()) {

@@ -14,7 +14,6 @@ import java.util.Map;
 public class TextFormatter implements Formatter {
 
     private static final TimeUtil timeUtilHour = new TimeUtil(TimeUtil.Duration.MINUTE, TimeUtil.Duration.HOUR);
-    private static final TimeUtil timeUtilDay = new TimeUtil(TimeUtil.Duration.MINUTE, TimeUtil.Duration.HOUR, TimeUtil.Duration.WORK_DAY);
 
     private StringBuffer reportBuffer = new StringBuffer();
 

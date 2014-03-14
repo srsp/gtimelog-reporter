@@ -10,6 +10,8 @@ import java.util.Calendar;
 
 
 import com.spruenker.gtimelog.reporter.model.LogEntry;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.junit.Test;
 
 /**
@@ -20,17 +22,25 @@ public class LogEntryTest {
 
 	@Test
 	public void testGetTask() {
+        // Given
 		LogEntry logEntry = new LogEntry("2011-11-21 19:14: Acme Inc: Implementation");
-		assertEquals("Acme Inc: Implementation", logEntry.getTask());
+        // When
+        String task = logEntry.getTask();
+        // Then
+		assertEquals("Acme Inc: Implementation", task);
 	}
 
 	@Test
-	public void testGetDate() {
+	public void getDateAndTimeWhenLogEntryAdded() {
+        // Given
 		LogEntry logEntry = new LogEntry("2011-11-21 19:14: Acme Inc: Implementation");
 		Calendar expected = Calendar.getInstance();
 		expected.clear();
 		expected.set(2011, 10, 21, 19, 14, 0); // Month is zero-based
-		assertEquals(expected.getTimeInMillis(), logEntry.getDate().getTime());
+        // When
+        LocalDateTime date = logEntry.getDateTime();
+        // Then
+		assertEquals(expected.getTimeInMillis(), date.toDate().getTime());
 	}
 
 	@Test

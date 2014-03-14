@@ -3,13 +3,13 @@
  */
 package com.spruenker.gtimelog.reporter.model;
 
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,10 +26,10 @@ public class Day {
 
 	private static final int MILLIS_TO_SECONDS = 1000;
 
-	private static final SimpleDateFormat PRETTY_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter PRETTY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     /** Holds the day this instance is for. */
-    private Date dayDate = null;
+    private LocalDateTime dayDate = null;
 
 	/** Holds the Tasks and times for these on the given day. */
 	private Map<String, Long> taskTimes = new TreeMap<String, Long>();
@@ -49,10 +49,9 @@ public class Day {
 
 	public void addLogEntry(LogEntry entry) {
         if (dayDate == null) {
-            dayDate = entry.getDate();
+            dayDate = entry.getDateTime();
         }
 		logEntries.add(entry);
-        calculate();
 	}
 
 
@@ -62,6 +61,7 @@ public class Day {
 	 * @return
 	 */
 	public Map<String, Long> getTaskTimes() {
+        calculate();
 		return taskTimes;
 	}
 
@@ -72,6 +72,7 @@ public class Day {
 	 * @return
 	 */
 	public Map<String, Long> getCategoryTimes() {
+        calculate();
 		return categoryTimes;
 	}
 
@@ -82,6 +83,7 @@ public class Day {
 	 * @return
 	 */
 	public long getSlackingTime() {
+        calculate();
 		return slackingTime;
 	}
 
@@ -92,7 +94,7 @@ public class Day {
 	 * @return
 	 */
 	public long getWorkingTime() {
-		calculate();
+        calculate();
 		return workingTime;
 	}
 
@@ -112,25 +114,25 @@ public class Day {
             LOGGER.debug("Cannot calculate duration.");
             return;
         } else if (logEntries.size() < 2) {
-            if (LOGGER.isDebugEnabled()) {
-			    LOGGER.debug("Cannot calculate duration for {}", PRETTY_DATE_FORMAT.format(dayDate));
+            if (LOGGER.isDebugEnabled() && dayDate != null) {
+			    LOGGER.debug("Cannot calculate duration for {}", PRETTY_DATE_FORMATTER.print(dayDate));
             }
 			return;
 		}
 
 		// Start the calculation
-		Date start = logEntries.get(0).getDate();
+		LocalDateTime start = dayDate;
 
 		for (LogEntry logEntry : logEntries) {
 			// First logEntry is not interesting.
-			if (start.equals(logEntry.getDate())) {
+			if (start.equals(logEntry.getDateTime())) {
 				continue;
 			}
 
 			String task = logEntry.getTask();
 
 			// Add time in Task map
-			long time = (logEntry.getDate().getTime() - start.getTime()) / MILLIS_TO_SECONDS;
+			long time = (logEntry.getDateTime().toDate().getTime() - start.toDate().getTime()) / MILLIS_TO_SECONDS;
 			if (taskTimes.containsKey(task)) {
 				long totalTime = time + taskTimes.get(task);
 				taskTimes.put(task, totalTime);
@@ -156,33 +158,22 @@ public class Day {
 			}
 
 			// Set new start date
-			start = logEntry.getDate();
+			start = logEntry.getDateTime();
 
 		}
 	}
 
 
-	public boolean isOn(Date date) {
-		// The day is unused, therefore it can be used for the given date.
-		if (logEntries.isEmpty()) {
-			return true;
-		}
+    public boolean isSameDay(final LocalDateTime otherDay) {
+        // The day is unused, therefore it can be used for the given date.
+        if (logEntries.isEmpty()) {
+            return true;
+        }
 
-		// Convert dates into Calendar
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(date.getTime());
-		Date dayDate = logEntries.get(0).getDate();
-		Calendar dayCalendar = Calendar.getInstance();
-		dayCalendar.setTimeInMillis(dayDate.getTime());
+        LocalDateTime thisDay = dayDate;
 
-		// Calculate if we have the correct day
-		if (dayCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
-				&& dayCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)
-				&& dayCalendar.get(Calendar.DAY_OF_MONTH) == calendar.get(Calendar.DAY_OF_MONTH)) {
-			return true;
-		}
-		return false;
-	}
+        return (thisDay.getYear() == otherDay.getYear() && thisDay.getDayOfYear() == otherDay.getDayOfYear());
+    }
 
 
 	public String getPrettyDay() {
@@ -190,8 +181,8 @@ public class Day {
 			return "";
 		}
 
-		Date dayDate = logEntries.get(0).getDate();
-		return PRETTY_DATE_FORMAT.format(dayDate);
+		LocalDateTime dayDate = logEntries.get(0).getDateTime();
+		return PRETTY_DATE_FORMATTER.print(dayDate);
 	}
 
 }

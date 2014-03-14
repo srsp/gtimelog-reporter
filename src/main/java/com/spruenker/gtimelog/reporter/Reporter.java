@@ -36,6 +36,7 @@ public class Reporter {
     private static String file;
     private static Formatter formatter;
     private static Printer printer;
+    private static TimeUtil.Period period;
 
     /**
      * Run with "java com.spruenker.gtimelog.reporter.Reporter -i "~/.gtimelog/timelog.txt"
@@ -51,7 +52,7 @@ public class Reporter {
         Report report = importFromFile();
 
         // Generate and print report
-        printer.print(formatter.format(report));
+        printer.print(formatter.format(report.getPeriod(period)));
     }
 
     /**
@@ -87,6 +88,7 @@ public class Reporter {
         options.addOption("i", "infile", true, "The location and file name of your gtimelog-file. Example ~/.gtimelog/timelog.txt");
         options.addOption("f", "formatter", true, "The Formatter to use. Available formatters are: text");
         options.addOption("p", "printer", true, "The Printer to use. Available printers are: tty");
+        options.addOption("t", "time", true, "The time period to report. Options are: all (default), week (current week, starting Monday)");
         //options.addOption("o", "output", true, "The name of the file the report is written into");
 
 
@@ -96,10 +98,12 @@ public class Reporter {
             String infileArg = cmd.getOptionValue("i", System.getProperty("user.home") +"/.gtimelog/timelog.txt");
             String formatterArg = cmd.getOptionValue("f", "text");
             String printerArg = cmd.getOptionValue("p", "tty");
+            String timeArg = cmd.getOptionValue("t", "all");
 
             file = infileArg;
             formatter = FormatterTypes.getInstance(formatterArg);
             printer = PrinterTypes.getInstance(printerArg);
+            period = TimeUtil.Period.valueOf(timeArg.toUpperCase());
 
         } catch (ParseException e) {
             LOGGER.warn("Could not parse command line arguments: ", e);
